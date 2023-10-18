@@ -4,9 +4,9 @@ from nss_handler import HandleRequests, status
 
 
 # Add your imports below this line
-from views import list_docks, retrieve_dock, delete_dock, update_dock
-from views import list_haulers, retrieve_hauler, delete_hauler, update_hauler
-from views import list_ships, retrieve_ship, delete_ship, update_ship
+from views import list_docks, retrieve_dock, delete_dock, update_dock, post_dock
+from views import list_haulers, retrieve_hauler, delete_hauler, update_hauler, post_hauler
+from views import list_ships, retrieve_ship, delete_ship, update_ship, post_ship
 
 
 class JSONServer(HandleRequests):
@@ -31,15 +31,15 @@ class JSONServer(HandleRequests):
                 response_body = retrieve_hauler(url["pk"])
                 return self.response(response_body, status.HTTP_200_SUCCESS.value)
 
-            response_body = list_haulers()
+            response_body = list_haulers(url['query_params'])
             return self.response(response_body, status.HTTP_200_SUCCESS.value)
 
         elif url["requested_resource"] == "ships":
             if url["pk"] != 0:
-                response_body = retrieve_ship(url["pk"])
+                response_body = retrieve_ship(url["pk"], url['query_params'])
                 return self.response(response_body, status.HTTP_200_SUCCESS.value)
 
-            response_body = list_ships()
+            response_body = list_ships(url['query_params'])
             return self.response(response_body, status.HTTP_200_SUCCESS.value)
 
         else:
@@ -111,9 +111,34 @@ class JSONServer(HandleRequests):
             return self.response("Not found", status.HTTP_404_CLIENT_ERROR_RESOURCE_NOT_FOUND.value)
 
     def do_POST(self):
-        """Handle POST requests from a client"""
+        #url is only needed for post 
+        url = self.parse_url(self.path)
+        #Python method added by instructor
+        content_len = int(self.headers.get('content-length', 0))
+        request_body = self.rfile.read(content_len)
+        request_body = json.loads(request_body)
+        #conditionals for returning success or not
+        if url["requested_resource"] == "ships":
+            successfully_posted = post_ship(request_body)
+            if successfully_posted:
+                return self.response("", status.HTTP_204_SUCCESS_NO_RESPONSE_BODY.value)
+            return self.response("Requested resource not found", status.HTTP_404_CLIENT_ERROR_RESOURCE_NOT_FOUND.value)
 
-        pass
+        elif url["requested_resource"] == "haulers":
+            successfully_posted = post_hauler(request_body)
+            if successfully_posted:
+                return self.response("", status.HTTP_204_SUCCESS_NO_RESPONSE_BODY.value)
+            return self.response("Requested resource not found", status.HTTP_404_CLIENT_ERROR_RESOURCE_NOT_FOUND.value)
+
+        elif url["requested_resource"] == "docks":
+            successfully_posted = post_dock(request_body)
+            if successfully_posted:
+                return self.response("", status.HTTP_204_SUCCESS_NO_RESPONSE_BODY.value)
+            return self.response("Requested resource not found", status.HTTP_404_CLIENT_ERROR_RESOURCE_NOT_FOUND.value)
+
+        else:
+            return self.response("Not found", status.HTTP_404_CLIENT_ERROR_RESOURCE_NOT_FOUND.value)
+
 
 
 
