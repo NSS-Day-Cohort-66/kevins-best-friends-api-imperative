@@ -22,6 +22,22 @@ def update_ship(id, ship_data):
     return True if rows_affected > 0 else False
 
 
+def post_ship(request_body):
+    with sqlite3.connect("./shipping.db") as conn:
+        db_cursor = conn.cursor()
+
+        db_cursor.execute(
+            """
+            INSERT INTO 'Ship' 
+            VALUES (null, ?, ?)
+            """,
+            (request_body["name"], request_body["hauler_id"]),
+        )
+        ship = db_cursor.fetchone()
+        serialized_ship = json.dumps(ship)
+    return serialized_ship
+
+
 def delete_ship(pk):
     with sqlite3.connect("./shipping.db") as conn:
         conn.row_factory = sqlite3.Row

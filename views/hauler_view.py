@@ -22,6 +22,22 @@ def update_hauler(id, hauler_data):
     return True if rows_affected > 0 else False
 
 
+def post_hauler(request_body):
+    with sqlite3.connect("./shipping.db") as conn:
+        db_cursor = conn.cursor()
+
+        db_cursor.execute(
+            """
+            INSERT INTO 'Hauler' 
+            VALUES (null, ?, ?)
+            """,
+            (request_body["name"], request_body["dock_id"]),
+        )
+        hauler = db_cursor.fetchone()
+        serialized_hauler = json.dumps(hauler)
+    return serialized_hauler
+
+
 def delete_hauler(pk):
     with sqlite3.connect("./shipping.db") as conn:
         conn.row_factory = sqlite3.Row

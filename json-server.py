@@ -4,9 +4,15 @@ from nss_handler import HandleRequests, status
 
 
 # Add your imports below this line
-from views import list_docks, retrieve_dock, delete_dock, update_dock
-from views import list_haulers, retrieve_hauler, delete_hauler, update_hauler
-from views import list_ships, retrieve_ship, delete_ship, update_ship
+from views import list_docks, retrieve_dock, delete_dock, update_dock, post_dock
+from views import (
+    list_haulers,
+    retrieve_hauler,
+    delete_hauler,
+    update_hauler,
+    post_hauler,
+)
+from views import list_ships, retrieve_ship, delete_ship, update_ship, post_ship
 
 
 class JSONServer(HandleRequests):
@@ -138,10 +144,40 @@ class JSONServer(HandleRequests):
                 "Not found", status.HTTP_404_CLIENT_ERROR_RESOURCE_NOT_FOUND.value
             )
 
-    def do_POST(self):
+    def do_POST(
+        self,
+    ):
         """Handle POST requests from a client"""
+        # Parse the URL and get the primary key
+        url = self.parse_url(self.path)
 
-        pass
+        # Get the request body JSON for the new data
+        content_len = int(self.headers.get("content-length", 0))
+        request_body = self.rfile.read(content_len)
+        request_body = json.loads(request_body)
+
+        if url["requested_resource"] == "ships":
+            successfully_posted = post_ship(request_body)
+            if successfully_posted:
+                return self.response("", status.HTTP_204_SUCCESS_NO_RESPONSE_BODY.value)
+
+        elif url["requested_resource"] == "docks":
+            successfully_posted = post_dock(request_body)
+            if successfully_posted:
+                return self.response("", status.HTTP_204_SUCCESS_NO_RESPONSE_BODY.value)
+
+        elif url["requested_resource"] == "haulers":
+            successfully_posted = post_hauler(request_body)
+            if successfully_posted:
+                return self.response("", status.HTTP_204_SUCCESS_NO_RESPONSE_BODY.value)
+
+        else:
+            return self.response(
+                "Unable to post",
+                status.HTTP_404_CLIENT_ERROR_RESOURCE_NOT_FOUND.value,
+            )
+
+        # pass
 
 
 #
