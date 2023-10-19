@@ -159,17 +159,17 @@ class JSONServer(HandleRequests):
         if url["requested_resource"] == "ships":
             successfully_posted = post_ship(request_body)
             if successfully_posted:
-                return self.response("", status.HTTP_204_SUCCESS_NO_RESPONSE_BODY.value)
+                return self.response("", status.HTTP_201_SUCCESS_CREATED.value)
 
         elif url["requested_resource"] == "docks":
             successfully_posted = post_dock(request_body)
             if successfully_posted:
-                return self.response("", status.HTTP_204_SUCCESS_NO_RESPONSE_BODY.value)
+                return self.response("", status.HTTP_201_SUCCESS_CREATED.value)
 
         elif url["requested_resource"] == "haulers":
             successfully_posted = post_hauler(request_body)
             if successfully_posted:
-                return self.response("", status.HTTP_204_SUCCESS_NO_RESPONSE_BODY.value)
+                return self.response("", status.HTTP_201_SUCCESS_CREATED.value)
 
         else:
             return self.response(
